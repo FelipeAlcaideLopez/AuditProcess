@@ -9,7 +9,7 @@
 ## Health Score
 
 ```
-Health Score: 63/100
+Health Score: 62/100
 ```
 
 🟡 **Needs Improvement** - Several areas require attention
@@ -20,12 +20,12 @@ Health Score: 63/100
 
 | Severity | Count | Percentage |
 |----------|-------|------------|
-| 🔴 Critical | 5 | 10% |
-| 🟠 High | 16 | 31% |
-| 🟡 Medium | 29 | 57% |
+| 🔴 Critical | 6 | 11% |
+| 🟠 High | 17 | 31% |
+| 🟡 Medium | 30 | 56% |
 | 🟢 Low | 0 | 0% |
 | ℹ️ Info | 1 | 2% |
-| **Total** | **51** | 100% |
+| **Total** | **54** | 100% |
 
 ---
 
@@ -38,12 +38,12 @@ pie title Findings by Category
     "Performance" : 2
     "Security" : 2
     "Design" : 4
-    "Testing" : 2
+    "Testing" : 4
     "Flow Design" : 5
     "Flow Performance" : 12
     "Packages" : 1
     "UI Performance" : 9
-    "Technical Debt" : 2
+    "Technical Debt" : 3
     "Governance" : 1
 ```
 
@@ -54,10 +54,10 @@ pie title Findings by Category
 | UI Performance | 9 |
 | Flow Design | 5 |
 | Design | 4 |
+| Testing | 4 |
+| Technical Debt | 3 |
 | Performance | 2 |
 | Security | 2 |
-| Testing | 2 |
-| Technical Debt | 2 |
 | Documentation | 1 |
 | Packages | 1 |
 | Governance | 1 |
@@ -71,6 +71,7 @@ pie title Findings by Category
 - **MethodNamingConventions violations found (105 occurrences)**: Code quality and maintainability impact
 - **FormalParameterNamingConventions violations found (48 occurrences)**: Code quality and maintainability impact
 - **ClassNamingConventions violations found (39 occurrences)**: Code quality and maintainability impact
+- **Org code coverage at 4.8% (below 75% threshold)**: Cannot deploy to production, potential bugs in untested code
 
 ---
 
@@ -106,8 +107,8 @@ pie title Findings by Category
 | Effort Level | Count | Percentage |
 |--------------|-------|------------|
 | Quick Win | 1 | 2% |
-| Medium | 34 | 67% |
-| High | 15 | 29% |
+| Medium | 35 | 65% |
+| High | 17 | 31% |
 
 ---
 
@@ -173,9 +174,9 @@ pie title Findings by Category
 
 ## Recommendations Summary
 
-1. **Immediate (Critical):** Address 5 critical findings immediately
-2. **Short-term (High):** Plan remediation for 16 high-priority items
-3. **Medium-term (Medium):** Schedule 29 medium-priority improvements
+1. **Immediate (Critical):** Address 6 critical findings immediately
+2. **Short-term (High):** Plan remediation for 17 high-priority items
+3. **Medium-term (Medium):** Schedule 30 medium-priority improvements
 4. **Long-term (Low):** Consider 0 low-priority enhancements
 
 ---

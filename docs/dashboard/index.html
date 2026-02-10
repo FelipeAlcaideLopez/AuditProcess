@@ -19,7 +19,8 @@
     <nav>
         <button class="nav-btn active" data-section="overview">Overview</button>
         <button class="nav-btn" data-section="findings">Findings</button>
-        <button class="nav-btn" data-section="apex">Apex Analysis</button>
+        <button class="nav-btn" data-section="apex">PMD Analysis</button>
+        <button class="nav-btn" data-section="apexclasses">Apex Classes</button>
         <button class="nav-btn" data-section="flows">Flow Analysis</button>
         <button class="nav-btn" data-section="objects">Objects & Fields</button>
         <button class="nav-btn" data-section="layouts">Layouts & Pages</button>
@@ -120,6 +121,127 @@
                         <tr>
                             <th>File</th>
                             <th>Violations</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Apex Classes & Coverage Section -->
+        <section id="apexclasses" class="section">
+            <div class="analysis-header">
+                <h2>Apex Classes & Test Coverage</h2>
+                <p id="apex-classes-summary"></p>
+            </div>
+
+            <!-- Coverage Score -->
+            <div class="health-score-container">
+                <div class="health-score">
+                    <div class="score-circle" id="coverage-circle">
+                        <span id="coverage-value">--</span><span style="font-size: 1rem">%</span>
+                    </div>
+                    <p class="score-label">Org Code Coverage</p>
+                    <p id="coverage-status" class="status-label"></p>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Total Classes</h3>
+                    <p id="total-apex-classes" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Test Classes</h3>
+                    <p id="test-classes" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Non-Test Classes</h3>
+                    <p id="non-test-classes" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Triggers</h3>
+                    <p id="apex-triggers" class="metric-value">--</p>
+                </div>
+                <div class="metric-card critical">
+                    <h3>0% Coverage</h3>
+                    <p id="zero-coverage" class="metric-value">--</p>
+                </div>
+                <div class="metric-card high">
+                    <h3>&lt;75% Coverage</h3>
+                    <p id="low-coverage" class="metric-value">--</p>
+                </div>
+                <div class="metric-card medium">
+                    <h3>Old API (&lt;v50)</h3>
+                    <p id="old-api-classes" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Without Sharing</h3>
+                    <p id="without-sharing" class="metric-value">--</p>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h3>Coverage Distribution</h3>
+                    <canvas id="coverage-distribution-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Classes by Type</h3>
+                    <canvas id="class-type-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h3>API Version Distribution</h3>
+                    <canvas id="api-version-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Sharing Model</h3>
+                    <canvas id="sharing-model-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <h3>Classes with Lowest Coverage</h3>
+                <table id="low-coverage-table">
+                    <thead>
+                        <tr>
+                            <th>Class Name</th>
+                            <th>Type</th>
+                            <th>Coverage</th>
+                            <th>Covered Lines</th>
+                            <th>Uncovered Lines</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="table-container">
+                <h3>Classes on Old API Versions</h3>
+                <table id="old-api-table">
+                    <thead>
+                        <tr>
+                            <th>Class Name</th>
+                            <th>Type</th>
+                            <th>API Version</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="table-container">
+                <h3>Apex Triggers</h3>
+                <table id="apex-triggers-table">
+                    <thead>
+                        <tr>
+                            <th>Trigger Name</th>
+                            <th>Object</th>
+                            <th>API Version</th>
+                            <th>Lines</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

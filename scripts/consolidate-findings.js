@@ -8,7 +8,8 @@ const findingFiles = [
     'docs/data/framework-findings.json',
     'docs/data/package-findings.json',
     'docs/data/object-findings.json',
-    'docs/data/layout-findings.json'
+    'docs/data/layout-findings.json',
+    'docs/data/apex-coverage-findings.json'
 ];
 
 const allFindings = [];

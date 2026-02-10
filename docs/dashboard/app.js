@@ -11,7 +11,8 @@ let data = {
     frameworkAnalysis: {},
     orgDetails: {},
     objectAnalysis: {},
-    layoutAnalysis: {}
+    layoutAnalysis: {},
+    apexClassesAnalysis: {}
 };
 
 // Load all data files
@@ -28,7 +29,8 @@ async function loadData() {
         { key: 'highPrivProfiles', path: '/data/high-privilege-profiles.json' },
         { key: 'namedCredentials', path: '/data/named-credentials.json' },
         { key: 'objectAnalysis', path: '/data/object-analysis.json' },
-        { key: 'layoutAnalysis', path: '/data/layout-analysis.json' }
+        { key: 'layoutAnalysis', path: '/data/layout-analysis.json' },
+        { key: 'apexClassesAnalysis', path: '/data/apex-classes-analysis.json' }
     ];
 
     for (const file of files) {
@@ -51,6 +53,7 @@ function initDashboard() {
     renderOverview();
     renderFindings();
     renderApexAnalysis();
+    renderApexClasses();
     renderFlowAnalysis();
     renderObjects();
     renderLayouts();
@@ -184,19 +187,25 @@ function renderSeverityChart(severityData) {
 
 function renderKeyMetrics() {
     const metricsContainer = document.getElementById('key-metrics');
-    const pmd = data.pmdAnalysis;
-    const flow = data.flowAnalysis;
-    const pkg = data.packageAnalysis;
-    const sec = data.securitySummary;
+    const pmd = data.pmdAnalysis || {};
+    const flow = data.flowAnalysis || {};
+    const pkg = data.packageAnalysis || {};
+    const sec = data.securitySummary || {};
+    const obj = data.objectAnalysis || {};
+    const layout = data.layoutAnalysis || {};
+
+    // Count apex files from byFile if totalFiles not available
+    const apexCount = pmd.totalFiles || (pmd.byFile ? Object.keys(pmd.byFile).length : null) || pmd.topFiles?.length || '?';
 
     const metrics = [
-        { label: 'Apex Classes', value: pmd.totalFiles || '?' },
-        { label: 'PMD Violations', value: pmd.totalViolations?.toLocaleString() || '?' },
-        { label: 'Total Flows', value: flow.totalFlows || '?' },
-        { label: 'Active Flows', value: flow.byStatus?.active || '?' },
-        { label: 'Installed Packages', value: pkg.totalPackages || '?' },
-        { label: 'Active Users', value: sec.activeUsers || '?' },
-        { label: 'Named Credentials', value: sec.namedCredentials?.length || '?' }
+        { label: 'Apex Classes', value: apexCount },
+        { label: 'PMD Violations', value: pmd.totalViolations?.toLocaleString() || '0' },
+        { label: 'Total Flows', value: flow.totalFlows || '0' },
+        { label: 'Active Flows', value: flow.byStatus?.active || '0' },
+        { label: 'FlexiPages', value: layout.flexipages?.total || '0' },
+        { label: 'Installed Packages', value: pkg.totalPackages || '0' },
+        { label: 'Active Users', value: sec.activeUsers || '0' },
+        { label: 'Named Credentials', value: sec.namedCredentials?.length || '0' }
     ];
 
     metricsContainer.innerHTML = metrics.map(m => `
@@ -357,6 +366,178 @@ function renderApexAnalysis() {
             <tr>
                 <td>${f.file}</td>
                 <td>${f.violations}</td>
+            </tr>
+        `).join('');
+    }
+}
+
+// Apex Classes & Coverage Section
+function renderApexClasses() {
+    const apex = data.apexClassesAnalysis;
+    if (!apex?.summary) return;
+
+    const summary = apex.summary;
+
+    // Summary text
+    document.getElementById('apex-classes-summary').textContent =
+        `${summary.totalClasses} classes (${summary.testClasses} test, ${summary.nonTestClasses} non-test), ${summary.triggers} triggers`;
+
+    // Coverage score circle
+    const coverage = summary.orgCoverage || 0;
+    document.getElementById('coverage-value').textContent = coverage;
+    const circle = document.getElementById('coverage-circle');
+    const status = document.getElementById('coverage-status');
+
+    if (coverage >= 75) {
+        circle.className = 'score-circle excellent';
+        status.textContent = 'Meets Requirement';
+        status.style.color = '#2e844a';
+    } else if (coverage >= 50) {
+        circle.className = 'score-circle needs-work';
+        status.textContent = 'Below Threshold';
+        status.style.color = '#ff9a3c';
+    } else {
+        circle.className = 'score-circle critical';
+        status.textContent = 'Critical - Blocks Deploy';
+        status.style.color = '#c23934';
+    }
+
+    // Metrics
+    document.getElementById('total-apex-classes').textContent = summary.totalClasses || 0;
+    document.getElementById('test-classes').textContent = summary.testClasses || 0;
+    document.getElementById('non-test-classes').textContent = summary.nonTestClasses || 0;
+    document.getElementById('apex-triggers').textContent = summary.triggers || 0;
+    document.getElementById('zero-coverage').textContent = summary.zeroCoverageCount || 0;
+    document.getElementById('low-coverage').textContent = summary.lowCoverageCount || 0;
+    document.getElementById('old-api-classes').textContent = summary.oldApiVersionCount || 0;
+    document.getElementById('without-sharing').textContent = summary.withoutSharingCount || 0;
+
+    // Coverage distribution chart
+    if (apex.coverageDistribution) {
+        const ctx = document.getElementById('coverage-distribution-chart').getContext('2d');
+        const dist = apex.coverageDistribution;
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(dist),
+                datasets: [{
+                    data: Object.values(dist),
+                    backgroundColor: ['#c23934', '#fe5c4c', '#ff9a3c', '#4bca81', '#2e844a']
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+
+    // Class type chart
+    if (apex.byType) {
+        const ctx = document.getElementById('class-type-chart').getContext('2d');
+        const types = Object.entries(apex.byType).sort((a, b) => b[1] - a[1]);
+
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: types.map(([t]) => t),
+                datasets: [{
+                    data: types.map(([, c]) => c),
+                    backgroundColor: ['#0176d3', '#1b96ff', '#57a3fd', '#aacbff', '#d8edff', '#706e6b', '#ff9a3c', '#4bca81']
+                }]
+            },
+            options: {
+                plugins: { legend: { position: 'right' } }
+            }
+        });
+    }
+
+    // API Version chart
+    if (apex.byApiVersion) {
+        const ctx = document.getElementById('api-version-chart').getContext('2d');
+        const versions = Object.entries(apex.byApiVersion).sort((a, b) => {
+            const vA = parseInt(a[0].replace('v', ''));
+            const vB = parseInt(b[0].replace('v', ''));
+            return vA - vB;
+        });
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: versions.map(([v]) => v),
+                datasets: [{
+                    data: versions.map(([, c]) => c),
+                    backgroundColor: versions.map(([v]) => {
+                        const ver = parseInt(v.replace('v', ''));
+                        if (ver < 50) return '#c23934';
+                        if (ver < 55) return '#ff9a3c';
+                        return '#2e844a';
+                    })
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+
+    // Sharing model chart
+    if (apex.bySharingModel) {
+        const ctx = document.getElementById('sharing-model-chart').getContext('2d');
+        const sharing = Object.entries(apex.bySharingModel);
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: sharing.map(([s]) => s),
+                datasets: [{
+                    data: sharing.map(([, c]) => c),
+                    backgroundColor: ['#2e844a', '#c23934', '#0176d3', '#706e6b']
+                }]
+            },
+            options: {
+                plugins: { legend: { position: 'right' } }
+            }
+        });
+    }
+
+    // Low coverage table
+    if (apex.lowCoverageClasses) {
+        const tbody = document.querySelector('#low-coverage-table tbody');
+        tbody.innerHTML = apex.lowCoverageClasses.map(c => `
+            <tr>
+                <td>${c.name}</td>
+                <td>${c.type}</td>
+                <td style="color: ${c.coverage < 50 ? '#c23934' : '#ff9a3c'}">${c.coverage}%</td>
+                <td>${c.coveredLines}</td>
+                <td>${c.uncoveredLines}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Old API table
+    if (apex.oldApiClasses) {
+        const tbody = document.querySelector('#old-api-table tbody');
+        tbody.innerHTML = apex.oldApiClasses.slice(0, 15).map(c => `
+            <tr>
+                <td>${c.name}</td>
+                <td>${c.type}</td>
+                <td style="color: ${c.apiVersion < 45 ? '#c23934' : '#ff9a3c'}">v${c.apiVersion}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Triggers table
+    if (apex.triggers) {
+        const tbody = document.querySelector('#apex-triggers-table tbody');
+        tbody.innerHTML = apex.triggers.map(t => `
+            <tr>
+                <td>${t.name}</td>
+                <td>${t.object}</td>
+                <td>v${t.apiVersion}</td>
+                <td>${t.lines || '-'}</td>
             </tr>
         `).join('');
     }
