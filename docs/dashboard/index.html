@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce Org Audit Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Salesforce Org Audit Dashboard</h1>
+        <div id="org-info">
+            <span id="org-name">Loading...</span>
+            <span id="audit-date"></span>
+        </div>
+    </header>
+
+    <nav>
+        <button class="nav-btn active" data-section="overview">Overview</button>
+        <button class="nav-btn" data-section="findings">Findings</button>
+        <button class="nav-btn" data-section="apex">Apex Analysis</button>
+        <button class="nav-btn" data-section="flows">Flow Analysis</button>
+        <button class="nav-btn" data-section="objects">Objects & Fields</button>
+        <button class="nav-btn" data-section="layouts">Layouts & Pages</button>
+        <button class="nav-btn" data-section="packages">Packages</button>
+        <button class="nav-btn" data-section="security">Security</button>
+        <button class="nav-btn" data-section="architecture">Architecture</button>
+        <button class="nav-btn" data-section="recommendations">Recommendations</button>
+    </nav>
+
+    <main>
+        <!-- Overview Section -->
+        <section id="overview" class="section active">
+            <div class="health-score-container">
+                <div class="health-score">
+                    <div class="score-circle" id="health-circle">
+                        <span id="health-value">--</span>
+                    </div>
+                    <p class="score-label">Health Score</p>
+                    <p id="health-status" class="status-label"></p>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Total Findings</h3>
+                    <p id="total-findings" class="metric-value">--</p>
+                </div>
+                <div class="metric-card critical">
+                    <h3>Critical</h3>
+                    <p id="critical-count" class="metric-value">--</p>
+                </div>
+                <div class="metric-card high">
+                    <h3>High</h3>
+                    <p id="high-count" class="metric-value">--</p>
+                </div>
+                <div class="metric-card medium">
+                    <h3>Medium</h3>
+                    <p id="medium-count" class="metric-value">--</p>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h3>Findings by Category</h3>
+                    <canvas id="category-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Findings by Severity</h3>
+                    <canvas id="severity-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="summary-stats">
+                <h3>Key Metrics</h3>
+                <div class="stats-grid" id="key-metrics"></div>
+            </div>
+        </section>
+
+        <!-- Findings Section -->
+        <section id="findings" class="section">
+            <div class="filters">
+                <select id="severity-filter">
+                    <option value="">All Severities</option>
+                    <option value="Critical">Critical</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                    <option value="Info">Info</option>
+                </select>
+                <select id="category-filter">
+                    <option value="">All Categories</option>
+                </select>
+                <input type="text" id="search-filter" placeholder="Search findings...">
+            </div>
+            <div id="findings-list" class="findings-list"></div>
+        </section>
+
+        <!-- Apex Analysis Section -->
+        <section id="apex" class="section">
+            <div class="analysis-header">
+                <h2>PMD Analysis Results</h2>
+                <p id="pmd-summary"></p>
+            </div>
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h3>Violations by Category</h3>
+                    <canvas id="pmd-category-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Top Violated Rules</h3>
+                    <canvas id="pmd-rules-chart"></canvas>
+                </div>
+            </div>
+            <div class="table-container">
+                <h3>Files with Most Violations</h3>
+                <table id="pmd-files-table">
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Violations</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Flow Analysis Section -->
+        <section id="flows" class="section">
+            <div class="analysis-header">
+                <h2>Flow Analysis Results</h2>
+                <p id="flow-summary"></p>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Total Flows</h3>
+                    <p id="total-flows" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Active</h3>
+                    <p id="active-flows" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Complex Flows</h3>
+                    <p id="complex-flows" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>With Issues</h3>
+                    <p id="flows-with-issues" class="metric-value">--</p>
+                </div>
+            </div>
+            <div class="chart-container">
+                <h3>Flows by Type</h3>
+                <canvas id="flow-type-chart"></canvas>
+            </div>
+            <div class="table-container">
+                <h3>Complex Flows (>20 elements)</h3>
+                <table id="complex-flows-table">
+                    <thead>
+                        <tr>
+                            <th>Flow Name</th>
+                            <th>Elements</th>
+                            <th>Issues</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Packages Section -->
+        <section id="packages" class="section">
+            <div class="analysis-header">
+                <h2>Installed Packages</h2>
+                <p id="package-summary"></p>
+            </div>
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h3>Packages by Vendor</h3>
+                    <canvas id="vendor-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Packages by Category</h3>
+                    <canvas id="package-category-chart"></canvas>
+                </div>
+            </div>
+            <div class="table-container">
+                <h3>All Installed Packages</h3>
+                <table id="packages-table">
+                    <thead>
+                        <tr>
+                            <th>Package Name</th>
+                            <th>Namespace</th>
+                            <th>Version</th>
+                            <th>Vendor</th>
+                            <th>Category</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Security Section -->
+        <section id="security" class="section">
+            <div class="analysis-header">
+                <h2>Security Analysis</h2>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Active Users</h3>
+                    <p id="active-users" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>High Priv Profiles</h3>
+                    <p id="high-priv-profiles" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>High Priv Perm Sets</h3>
+                    <p id="high-priv-permsets" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Named Credentials</h3>
+                    <p id="named-creds" class="metric-value">--</p>
+                </div>
+            </div>
+            <div class="table-container">
+                <h3>High Privilege Profiles</h3>
+                <table id="profiles-table">
+                    <thead>
+                        <tr>
+                            <th>Profile Name</th>
+                            <th>Modify All Data</th>
+                            <th>View All Data</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="table-container">
+                <h3>Named Credentials</h3>
+                <table id="named-creds-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Endpoint</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Architecture Section -->
+        <section id="architecture" class="section">
+            <div class="analysis-header">
+                <h2>Architecture Patterns</h2>
+            </div>
+            <div class="patterns-grid">
+                <div class="pattern-card" id="trigger-framework">
+                    <h3>Trigger Framework</h3>
+                    <p class="pattern-status">Checking...</p>
+                    <p class="pattern-detail"></p>
+                </div>
+                <div class="pattern-card" id="selector-pattern">
+                    <h3>Selector Pattern</h3>
+                    <p class="pattern-status">Checking...</p>
+                </div>
+                <div class="pattern-card" id="service-pattern">
+                    <h3>Service Pattern</h3>
+                    <p class="pattern-status">Checking...</p>
+                </div>
+                <div class="pattern-card" id="domain-pattern">
+                    <h3>Domain Pattern</h3>
+                    <p class="pattern-status">Checking...</p>
+                </div>
+                <div class="pattern-card" id="factory-pattern">
+                    <h3>Factory Pattern</h3>
+                    <p class="pattern-status">Checking...</p>
+                </div>
+                <div class="pattern-card" id="test-factory">
+                    <h3>Test Data Factory</h3>
+                    <p class="pattern-status">Checking...</p>
+                </div>
+            </div>
+            <div class="integration-patterns">
+                <h3>Integration Patterns</h3>
+                <div class="patterns-grid">
+                    <div class="pattern-card" id="http-callouts">
+                        <h3>HTTP Callouts</h3>
+                        <p class="pattern-status">Checking...</p>
+                    </div>
+                    <div class="pattern-card" id="queueable">
+                        <h3>Queueable</h3>
+                        <p class="pattern-status">Checking...</p>
+                    </div>
+                    <div class="pattern-card" id="batch-apex">
+                        <h3>Batch Apex</h3>
+                        <p class="pattern-status">Checking...</p>
+                    </div>
+                    <div class="pattern-card" id="schedulable">
+                        <h3>Schedulable</h3>
+                        <p class="pattern-status">Checking...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="table-container">
+                <h3>Trigger Analysis</h3>
+                <table id="triggers-table">
+                    <thead>
+                        <tr>
+                            <th>Trigger</th>
+                            <th>Type</th>
+                            <th>Lines</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Objects & Fields Section -->
+        <section id="objects" class="section">
+            <div class="analysis-header">
+                <h2>Objects & Fields Analysis</h2>
+                <p id="object-summary"></p>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Custom Objects</h3>
+                    <p id="custom-objects" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Custom Metadata</h3>
+                    <p id="custom-metadata" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Custom Fields</h3>
+                    <p id="custom-fields" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Record Types</h3>
+                    <p id="total-record-types" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Validation Rules</h3>
+                    <p id="total-validation-rules" class="metric-value">--</p>
+                </div>
+            </div>
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h3>Fields by Type</h3>
+                    <canvas id="field-type-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Validation Rules by Object</h3>
+                    <canvas id="vr-by-object-chart"></canvas>
+                </div>
+            </div>
+            <div class="table-container">
+                <h3>Objects with Most Fields</h3>
+                <table id="objects-table">
+                    <thead>
+                        <tr>
+                            <th>Object</th>
+                            <th>Fields</th>
+                            <th>Record Types</th>
+                            <th>Validation Rules</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="table-container">
+                <h3>Record Types</h3>
+                <table id="record-types-table">
+                    <thead>
+                        <tr>
+                            <th>Object</th>
+                            <th>Record Type</th>
+                            <th>Active</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="table-container">
+                <h3>Validation Rules</h3>
+                <table id="validation-rules-table">
+                    <thead>
+                        <tr>
+                            <th>Object</th>
+                            <th>Rule Name</th>
+                            <th>Active</th>
+                            <th>Complexity</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Layouts & Pages Section -->
+        <section id="layouts" class="section">
+            <div class="analysis-header">
+                <h2>Layouts & Lightning Pages</h2>
+                <p id="layout-summary"></p>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Page Layouts</h3>
+                    <p id="total-layouts" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>FlexiPages</h3>
+                    <p id="total-flexipages" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>LWC Usage</h3>
+                    <p id="lwc-usage" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Aura Usage</h3>
+                    <p id="aura-usage" class="metric-value">--</p>
+                </div>
+            </div>
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h3>FlexiPages by Type</h3>
+                    <canvas id="flexipage-type-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Avg Fields per Layout vs Components per Page</h3>
+                    <canvas id="layout-complexity-chart"></canvas>
+                </div>
+            </div>
+            <div class="table-container">
+                <h3>Complex FlexiPages (Many Components)</h3>
+                <table id="complex-flexipages-table">
+                    <thead>
+                        <tr>
+                            <th>Page Name</th>
+                            <th>Type</th>
+                            <th>Components</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="table-container">
+                <h3>Layouts with Many Fields</h3>
+                <table id="complex-layouts-table">
+                    <thead>
+                        <tr>
+                            <th>Layout Name</th>
+                            <th>Object</th>
+                            <th>Fields</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Recommendations Section -->
+        <section id="recommendations" class="section">
+            <div class="analysis-header">
+                <h2>Recommendations & Action Plan</h2>
+                <p>Prioritized recommendations based on audit findings</p>
+            </div>
+
+            <div class="recommendations-container">
+                <div class="recommendation-group critical">
+                    <h3>🔴 Immediate Actions (Critical)</h3>
+                    <div id="critical-recommendations" class="recommendation-list"></div>
+                </div>
+
+                <div class="recommendation-group high">
+                    <h3>🟠 Short-term Actions (High Priority)</h3>
+                    <div id="high-recommendations" class="recommendation-list"></div>
+                </div>
+
+                <div class="recommendation-group medium">
+                    <h3>🟡 Medium-term Actions</h3>
+                    <div id="medium-recommendations" class="recommendation-list"></div>
+                </div>
+
+                <div class="recommendation-group low">
+                    <h3>🟢 Long-term Improvements</h3>
+                    <div id="low-recommendations" class="recommendation-list"></div>
+                </div>
+            </div>
+
+            <div class="effort-summary">
+                <h3>Effort Distribution</h3>
+                <div class="charts-row">
+                    <div class="chart-container">
+                        <canvas id="effort-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Quick Wins</h3>
+                        <div id="quick-wins-list" class="quick-wins"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="next-steps">
+                <h3>Next Steps</h3>
+                <ol>
+                    <li>Review and prioritize Critical and High findings</li>
+                    <li>Create remediation backlog/tickets in Jira</li>
+                    <li>Address Quick Wins in the next sprint</li>
+                    <li>Plan Medium effort items for upcoming releases</li>
+                    <li>Schedule follow-up audit in 3-6 months</li>
+                </ol>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Salesforce Org Audit Framework | felipe.lopez@ncino.com | Generated with Claude Code</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

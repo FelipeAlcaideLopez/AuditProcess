@@ -1,0 +1,99 @@
+# ===========================================
+# SF ORG AUDIT PROJECT - GITIGNORE
+# ===========================================
+# Only track: docs/, scripts/, config/, CLAUDE.md
+# Ignore: retrieved metadata, reports, temp files
+
+# -------------------------------------------
+# RETRIEVED METADATA (Ignore all SF metadata)
+# -------------------------------------------
+force-app/
+
+# -------------------------------------------
+# EXTRACTED DATA (Org-specific data - ignore)
+# -------------------------------------------
+docs/data/
+
+# -------------------------------------------
+# REPORTS (Generated outputs - ignore)
+# -------------------------------------------
+reports/
+
+# -------------------------------------------
+# TEMP FILES
+# -------------------------------------------
+/tmp/
+*.tmp
+
+# -------------------------------------------
+# Salesforce cache
+# -------------------------------------------
+.sf/
+.sfdx/
+.localdevserver/
+deploy-options.json
+
+# -------------------------------------------
+# Claude Code local config
+# -------------------------------------------
+.claude/
+
+# -------------------------------------------
+# LWC
+# -------------------------------------------
+**/lwc/jsconfig.json
+coverage/
+
+# -------------------------------------------
+# Logs
+# -------------------------------------------
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# -------------------------------------------
+# Dependencies
+# -------------------------------------------
+node_modules/
+
+# -------------------------------------------
+# Caches
+# -------------------------------------------
+.pmdCache
+.eslintcache
+
+# -------------------------------------------
+# OS Files
+# -------------------------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# -------------------------------------------
+# Environment
+# -------------------------------------------
+.env
+
+# -------------------------------------------
+# IDE specific
+# -------------------------------------------
+.vscode/
+.idea/
+
+# -------------------------------------------
+# Standard SF project files (not needed for audit)
+# -------------------------------------------
+sfdx-project.json
+package.json
+package-lock.json
+jest.config.js
+eslint.config.js
+README.md
+.forceignore
+.prettierrc
+.prettierignore
+.husky/
