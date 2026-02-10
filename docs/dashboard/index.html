@@ -181,6 +181,38 @@
                 </div>
             </div>
 
+            <!-- Test Class Issues -->
+            <div class="analysis-header" style="margin-top: 2rem;">
+                <h3>Test Class Best Practices</h3>
+                <p>Analysis of test class quality issues</p>
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card high">
+                    <h3>SeeAllData=true</h3>
+                    <p id="test-seealldata" class="metric-value">--</p>
+                </div>
+                <div class="metric-card high">
+                    <h3>No Assertions</h3>
+                    <p id="test-no-assertions" class="metric-value">--</p>
+                </div>
+                <div class="metric-card medium">
+                    <h3>Hardcoded IDs</h3>
+                    <p id="test-hardcoded-ids" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Missing startTest</h3>
+                    <p id="test-missing-startstop" class="metric-value">--</p>
+                </div>
+                <div class="metric-card medium">
+                    <h3>DML in Loops</h3>
+                    <p id="test-dml-loops" class="metric-value">--</p>
+                </div>
+                <div class="metric-card critical">
+                    <h3>Tests with Issues</h3>
+                    <p id="test-with-issues" class="metric-value">--</p>
+                </div>
+            </div>
+
             <div class="charts-row">
                 <div class="chart-container">
                     <h3>Coverage Distribution</h3>
@@ -227,6 +259,20 @@
                             <th>Class Name</th>
                             <th>Type</th>
                             <th>API Version</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="table-container">
+                <h3>Test Classes with Issues</h3>
+                <table id="test-issues-table">
+                    <thead>
+                        <tr>
+                            <th>Test Class Name</th>
+                            <th>Lines</th>
+                            <th>Issues Found</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

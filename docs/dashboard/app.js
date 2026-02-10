@@ -412,6 +412,15 @@ function renderApexClasses() {
     document.getElementById('old-api-classes').textContent = summary.oldApiVersionCount || 0;
     document.getElementById('without-sharing').textContent = summary.withoutSharingCount || 0;
 
+    // Test class issues metrics
+    const testIssues = summary.testIssuesSummary || {};
+    document.getElementById('test-seealldata').textContent = testIssues.seeAllData || 0;
+    document.getElementById('test-no-assertions').textContent = testIssues.noAssertions || 0;
+    document.getElementById('test-hardcoded-ids').textContent = testIssues.hardcodedIds || 0;
+    document.getElementById('test-missing-startstop').textContent = testIssues.missingStartStop || 0;
+    document.getElementById('test-dml-loops').textContent = testIssues.dmlInLoop || 0;
+    document.getElementById('test-with-issues').textContent = summary.testClassesWithIssues || 0;
+
     // Coverage distribution chart
     if (apex.coverageDistribution) {
         const ctx = document.getElementById('coverage-distribution-chart').getContext('2d');
@@ -525,6 +534,18 @@ function renderApexClasses() {
                 <td>${c.name}</td>
                 <td>${c.type}</td>
                 <td style="color: ${c.apiVersion < 45 ? '#c23934' : '#ff9a3c'}">v${c.apiVersion}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Test class issues table
+    if (apex.testClassIssues) {
+        const tbody = document.querySelector('#test-issues-table tbody');
+        tbody.innerHTML = apex.testClassIssues.slice(0, 20).map(c => `
+            <tr>
+                <td>${c.name}</td>
+                <td>${c.lines}</td>
+                <td style="color: ${c.issues.length > 2 ? '#c23934' : '#ff9a3c'}">${c.issues.join(', ')}</td>
             </tr>
         `).join('');
     }
