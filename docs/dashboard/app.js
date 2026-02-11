@@ -12,7 +12,8 @@ let data = {
     orgDetails: {},
     objectAnalysis: {},
     layoutAnalysis: {},
-    apexClassesAnalysis: {}
+    apexClassesAnalysis: {},
+    descriptionAnalysis: {}
 };
 
 // Load all data files
@@ -30,7 +31,8 @@ async function loadData() {
         { key: 'namedCredentials', path: '/data/named-credentials.json' },
         { key: 'objectAnalysis', path: '/data/object-analysis.json' },
         { key: 'layoutAnalysis', path: '/data/layout-analysis.json' },
-        { key: 'apexClassesAnalysis', path: '/data/apex-classes-analysis.json' }
+        { key: 'apexClassesAnalysis', path: '/data/apex-classes-analysis.json' },
+        { key: 'descriptionAnalysis', path: '/data/description-analysis.json' }
     ];
 
     for (const file of files) {
@@ -60,6 +62,7 @@ function initDashboard() {
     renderPackages();
     renderSecurity();
     renderArchitecture();
+    renderDocumentation();
     renderRecommendations();
 }
 
@@ -306,68 +309,80 @@ function filterFindings() {
 // Apex Analysis Section
 function renderApexAnalysis() {
     const pmd = data.pmdAnalysis;
-    if (!pmd.totalViolations) return;
+    console.log('PMD Data:', pmd); // Debug
+
+    if (!pmd || !pmd.totalViolations) {
+        console.warn('No PMD data available');
+        return;
+    }
 
     document.getElementById('pmd-summary').textContent =
         `${pmd.totalViolations.toLocaleString()} violations found across ${pmd.totalFiles || '?'} files`;
 
     // Category chart
-    if (pmd.byCategory) {
-        const ctx = document.getElementById('pmd-category-chart').getContext('2d');
-        const sorted = Object.entries(pmd.byCategory).sort((a, b) => b[1] - a[1]);
-
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: sorted.map(([cat]) => cat),
-                datasets: [{
-                    data: sorted.map(([, count]) => count),
-                    backgroundColor: '#0176d3'
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                plugins: { legend: { display: false } },
-                scales: { x: { beginAtZero: true } }
-            }
-        });
+    if (pmd.byCategory && Object.keys(pmd.byCategory).length > 0) {
+        const ctx = document.getElementById('pmd-category-chart');
+        if (ctx) {
+            const sorted = Object.entries(pmd.byCategory).sort((a, b) => b[1] - a[1]);
+            console.log('Category data:', sorted); // Debug
+            new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: sorted.map(([cat]) => cat),
+                    datasets: [{
+                        data: sorted.map(([, count]) => count),
+                        backgroundColor: '#1A3E5C'
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true } }
+                }
+            });
+        }
     }
 
     // Rules chart
-    if (pmd.topRules) {
-        const ctx = document.getElementById('pmd-rules-chart').getContext('2d');
-        const top10 = pmd.topRules.slice(0, 10);
-
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: top10.map(r => r.rule),
-                datasets: [{
-                    data: top10.map(r => r.count),
-                    backgroundColor: top10.map(r => {
-                        if (r.severity === 'Critical') return '#c23934';
-                        if (r.severity === 'High') return '#fe5c4c';
-                        return '#ff9a3c';
-                    })
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                plugins: { legend: { display: false } },
-                scales: { x: { beginAtZero: true } }
-            }
-        });
+    if (pmd.topRules && pmd.topRules.length > 0) {
+        const ctx = document.getElementById('pmd-rules-chart');
+        if (ctx) {
+            const top10 = pmd.topRules.slice(0, 10);
+            console.log('Top rules:', top10); // Debug
+            new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: top10.map(r => r.rule),
+                    datasets: [{
+                        data: top10.map(r => r.count),
+                        backgroundColor: top10.map(r => {
+                            if (r.severity === 'Critical') return '#c23934';
+                            if (r.severity === 'High') return '#fe5c4c';
+                            return '#ff9a3c';
+                        })
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true } }
+                }
+            });
+        }
     }
 
     // Files table
-    if (pmd.topFiles) {
+    if (pmd.topFiles && pmd.topFiles.length > 0) {
         const tbody = document.querySelector('#pmd-files-table tbody');
-        tbody.innerHTML = pmd.topFiles.slice(0, 15).map(f => `
-            <tr>
-                <td>${f.file}</td>
-                <td>${f.violations}</td>
-            </tr>
-        `).join('');
+        if (tbody) {
+            console.log('Top files:', pmd.topFiles.slice(0, 5)); // Debug
+            tbody.innerHTML = pmd.topFiles.slice(0, 15).map(f => `
+                <tr>
+                    <td>${f.file}</td>
+                    <td>${f.violations}</td>
+                </tr>
+            `).join('');
+        }
     }
 }
 
@@ -1013,6 +1028,172 @@ function renderRecommendationGroup(containerId, findings) {
             <div class="action">${f.recommendation || 'Review and remediate'}</div>
         </div>
     `).join('');
+}
+
+// Documentation Section
+function renderDocumentation() {
+    const doc = data.descriptionAnalysis;
+    if (!doc?.summary) return;
+
+    const summary = doc.summary;
+    const results = doc.results || {};
+
+    // Documentation coverage (inverse of missing percentage)
+    const coverage = 100 - (summary.percentageMissing || 0);
+
+    document.getElementById('doc-summary').textContent =
+        `${summary.totalMissing} components missing descriptions out of ${summary.totalComponents} analyzed`;
+
+    // AI Readiness Alert
+    const aiAlert = document.getElementById('ai-alert');
+    const aiAlertText = document.getElementById('ai-alert-text');
+
+    if (summary.percentageMissing > 20) {
+        aiAlert.style.display = 'flex';
+        aiAlert.className = 'ai-readiness-alert';
+        aiAlertText.textContent = `${summary.percentageMissing}% of metadata lacks descriptions. AI tools (Copilot, Claude, Agentforce) cannot understand component purposes without descriptions. This severely limits automated analysis, code reviews, impact analysis, and AI-assisted development capabilities.`;
+    } else {
+        aiAlert.style.display = 'flex';
+        aiAlert.className = 'ai-readiness-alert good';
+        document.querySelector('.ai-alert-content h3').textContent = 'AI Ready';
+        aiAlertText.textContent = `Good documentation coverage (${coverage}%). AI tools can effectively analyze and assist with this codebase.`;
+    }
+
+    // Score circle
+    document.getElementById('doc-score-value').textContent = coverage;
+    const circle = document.getElementById('doc-score-circle');
+    const status = document.getElementById('doc-score-status');
+
+    if (coverage >= 80) {
+        circle.className = 'score-circle excellent';
+        status.textContent = 'Well Documented';
+        status.style.color = '#2e844a';
+    } else if (coverage >= 60) {
+        circle.className = 'score-circle good';
+        status.textContent = 'Needs Improvement';
+        status.style.color = '#4bca81';
+    } else if (coverage >= 40) {
+        circle.className = 'score-circle needs-work';
+        status.textContent = 'Poor Documentation';
+        status.style.color = '#ff9a3c';
+    } else {
+        circle.className = 'score-circle critical';
+        status.textContent = 'Critical Gap';
+        status.style.color = '#c23934';
+    }
+
+    // Metrics
+    document.getElementById('doc-total-components').textContent = summary.totalComponents || 0;
+    document.getElementById('doc-missing-total').textContent = summary.totalMissing || 0;
+    document.getElementById('doc-fields-missing').textContent = results.fields?.missing || 0;
+    document.getElementById('doc-classes-missing').textContent = results.apexClasses?.missing || 0;
+    document.getElementById('doc-flows-missing').textContent = results.flows?.missing || 0;
+    document.getElementById('doc-lwc-missing').textContent = results.lwc?.missing || 0;
+
+    // Missing by type chart
+    if (summary.byType) {
+        const ctx = document.getElementById('doc-by-type-chart').getContext('2d');
+        const types = Object.entries(summary.byType)
+            .filter(([, data]) => data.missing > 0)
+            .sort((a, b) => b[1].missing - a[1].missing);
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: types.map(([type]) => type),
+                datasets: [{
+                    label: 'Missing',
+                    data: types.map(([, data]) => data.missing),
+                    backgroundColor: '#c23934'
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: { x: { beginAtZero: true } }
+            }
+        });
+    }
+
+    // Coverage by type chart
+    if (summary.byType) {
+        const ctx = document.getElementById('doc-coverage-chart').getContext('2d');
+        const types = Object.entries(summary.byType)
+            .sort((a, b) => a[1].percentage - b[1].percentage);
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: types.map(([type]) => type),
+                datasets: [{
+                    label: 'Documented %',
+                    data: types.map(([, data]) => 100 - data.percentage),
+                    backgroundColor: types.map(([, data]) => {
+                        const documented = 100 - data.percentage;
+                        if (documented >= 80) return '#2e844a';
+                        if (documented >= 60) return '#4bca81';
+                        if (documented >= 40) return '#ff9a3c';
+                        return '#c23934';
+                    })
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: { x: { beginAtZero: true, max: 100 } }
+            }
+        });
+    }
+
+    // Fields table
+    if (results.fields?.items) {
+        const tbody = document.querySelector('#fields-no-desc-table tbody');
+        tbody.innerHTML = results.fields.items.slice(0, 20).map(f => {
+            const parts = f.name.split('.');
+            const obj = parts[0] || '';
+            const field = parts[1] || f.name;
+            return `
+                <tr>
+                    <td>${field}</td>
+                    <td>${obj}</td>
+                    <td style="font-size: 0.75rem; color: #706e6b;">${f.path || ''}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // Classes table
+    if (results.apexClasses?.items) {
+        const tbody = document.querySelector('#classes-no-desc-table tbody');
+        tbody.innerHTML = results.apexClasses.items.slice(0, 20).map(c => `
+            <tr>
+                <td>${c.name}</td>
+                <td style="font-size: 0.75rem; color: #706e6b;">${c.path || ''}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Flows table
+    if (results.flows?.items) {
+        const tbody = document.querySelector('#flows-no-desc-table tbody');
+        tbody.innerHTML = results.flows.items.map(f => `
+            <tr>
+                <td>${f.name}</td>
+                <td style="font-size: 0.75rem; color: #706e6b;">${f.path || ''}</td>
+            </tr>
+        `).join('');
+    }
+
+    // LWC table
+    if (results.lwc?.items) {
+        const tbody = document.querySelector('#lwc-no-desc-table tbody');
+        tbody.innerHTML = results.lwc.items.map(l => `
+            <tr>
+                <td>${l.name}</td>
+                <td style="font-size: 0.75rem; color: #706e6b;">${l.path || ''}</td>
+            </tr>
+        `).join('');
+    }
 }
 
 // Start loading data

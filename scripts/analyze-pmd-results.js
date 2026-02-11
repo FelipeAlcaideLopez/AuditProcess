@@ -179,6 +179,19 @@ Object.entries(analysis.byFile)
         console.log(`  ${file}: ${data.count} violations`);
     });
 
+// Create topFiles and topRules arrays for dashboard
+analysis.topFiles = Object.entries(analysis.byFile)
+    .sort((a, b) => b[1].count - a[1].count)
+    .slice(0, 20)
+    .map(([file, data]) => ({ file, violations: data.count }));
+
+analysis.topRules = Object.entries(analysis.byRule)
+    .sort((a, b) => b[1].count - a[1].count)
+    .slice(0, 15)
+    .map(([rule, data]) => ({ rule, count: data.count, severity: data.severity, category: data.category }));
+
+analysis.totalFiles = Object.keys(analysis.byFile).length;
+
 // Save results
 fs.writeFileSync('docs/data/apex-findings.json', JSON.stringify(analysis.findings, null, 2));
 fs.writeFileSync('docs/data/pmd-analysis.json', JSON.stringify(analysis, null, 2));

@@ -9,7 +9,10 @@
 </head>
 <body>
     <header>
-        <h1>Salesforce Org Audit Dashboard</h1>
+        <div class="header-brand">
+            <img src="ncino-logo-white.svg" alt="nCino" class="header-logo">
+            <h1>Salesforce Org Audit Dashboard</h1>
+        </div>
         <div id="org-info">
             <span id="org-name">Loading...</span>
             <span id="audit-date"></span>
@@ -27,6 +30,7 @@
         <button class="nav-btn" data-section="packages">Packages</button>
         <button class="nav-btn" data-section="security">Security</button>
         <button class="nav-btn" data-section="architecture">Architecture</button>
+        <button class="nav-btn" data-section="documentation">Documentation</button>
         <button class="nav-btn" data-section="recommendations">Recommendations</button>
     </nav>
 
@@ -632,6 +636,129 @@
             </div>
         </section>
 
+        <!-- Documentation Section -->
+        <section id="documentation" class="section">
+            <div class="analysis-header">
+                <h2>Metadata Documentation Analysis</h2>
+                <p id="doc-summary">Analyzing missing descriptions in metadata components...</p>
+            </div>
+
+            <!-- AI Readiness Alert -->
+            <div class="ai-readiness-alert" id="ai-alert">
+                <div class="ai-alert-icon">🤖</div>
+                <div class="ai-alert-content">
+                    <h3>AI Readiness Warning</h3>
+                    <p id="ai-alert-text">Missing descriptions prevent AI tools (Copilot, Claude, Agentforce) from understanding your metadata. This limits automated analysis, code reviews, and AI-assisted development.</p>
+                    <div class="ai-alert-details">
+                        <span><strong>Impact:</strong> AI cannot determine field purposes, flow logic, or class responsibilities</span>
+                        <span><strong>Action:</strong> Add descriptions to enable AI-powered development tools</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documentation Score -->
+            <div class="health-score-container">
+                <div class="health-score">
+                    <div class="score-circle" id="doc-score-circle">
+                        <span id="doc-score-value">--</span><span style="font-size: 1rem">%</span>
+                    </div>
+                    <p class="score-label">Documentation Coverage</p>
+                    <p id="doc-score-status" class="status-label"></p>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Total Components</h3>
+                    <p id="doc-total-components" class="metric-value">--</p>
+                </div>
+                <div class="metric-card critical">
+                    <h3>Missing Descriptions</h3>
+                    <p id="doc-missing-total" class="metric-value">--</p>
+                </div>
+                <div class="metric-card high">
+                    <h3>Fields Missing</h3>
+                    <p id="doc-fields-missing" class="metric-value">--</p>
+                </div>
+                <div class="metric-card medium">
+                    <h3>Classes Missing</h3>
+                    <p id="doc-classes-missing" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Flows Missing</h3>
+                    <p id="doc-flows-missing" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>LWC Missing</h3>
+                    <p id="doc-lwc-missing" class="metric-value">--</p>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h3>Missing Descriptions by Type</h3>
+                    <canvas id="doc-by-type-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Documentation Coverage by Type</h3>
+                    <canvas id="doc-coverage-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <h3>Fields Without Descriptions (Top 20)</h3>
+                <table id="fields-no-desc-table">
+                    <thead>
+                        <tr>
+                            <th>Field Name</th>
+                            <th>Object</th>
+                            <th>Path</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="table-container">
+                <h3>Apex Classes Without Documentation (Top 20)</h3>
+                <table id="classes-no-desc-table">
+                    <thead>
+                        <tr>
+                            <th>Class Name</th>
+                            <th>Path</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="table-container">
+                <h3>Flows Without Descriptions</h3>
+                <table id="flows-no-desc-table">
+                    <thead>
+                        <tr>
+                            <th>Flow Name</th>
+                            <th>Path</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="table-container">
+                <h3>LWC Components Without Descriptions</h3>
+                <table id="lwc-no-desc-table">
+                    <thead>
+                        <tr>
+                            <th>Component Name</th>
+                            <th>Path</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
         <!-- Recommendations Section -->
         <section id="recommendations" class="section">
             <div class="analysis-header">
@@ -688,7 +815,13 @@
     </main>
 
     <footer>
-        <p>Salesforce Org Audit Framework | felipe.lopez@ncino.com | Generated with Claude Code</p>
+        <div class="footer-content">
+            <div class="footer-info">
+                <p><strong>Salesforce Org Audit Framework</strong></p>
+                <p>Created by felipe.lopez@ncino.com | nCino Customer Success EMEA</p>
+            </div>
+            <img src="ncino-logo-white.svg" alt="nCino" class="footer-logo">
+        </div>
     </footer>
 
     <script src="app.js"></script>

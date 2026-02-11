@@ -48,6 +48,7 @@ sf project retrieve start --metadata Profile,PermissionSet,CustomObject --target
 | 11 | `docs/guides/11-optimizer-analysis.md` | SF Optimizer |
 | 12 | `docs/guides/12-framework-analysis.md` | Pattern Detection |
 | 13 | `docs/guides/13-package-analysis.md` | Installed Packages |
+| 14 | `docs/guides/14-description-analysis.md` | Metadata Descriptions |
 
 ## Key Commands
 
@@ -64,6 +65,9 @@ node scripts/analyze-frameworks.js
 # Package Analysis
 node scripts/analyze-packages.js
 
+# Metadata Description Analysis
+node scripts/analyze-metadata-descriptions.js
+
 # Org Limits
 curl -H "Authorization: Bearer $TOKEN" "$INSTANCE/services/data/v59.0/limits/"
 
@@ -77,7 +81,7 @@ node scripts/generate-executive-summary.js
 ```json
 {
   "id": "AUDIT-001",
-  "category": "Security|Code Quality|Performance|Flow|Governance",
+  "category": "Security|Code Quality|Performance|Flow|Governance|Documentation",
   "severity": "Critical|High|Medium|Low|Info",
   "title": "Brief description",
   "description": "Detailed explanation",
@@ -118,11 +122,24 @@ SELECT DeveloperName, Endpoint FROM NamedCredential
 
 ```
 docs/
-├── guides/           # Execution guides (00-12) - tracked in git
+├── guides/           # Execution guides (00-14) - tracked in git
 ├── data/             # JSON analysis data - NOT tracked (org-specific)
 │   ├── all-findings.json
+│   ├── findings-summary.json
+│   ├── pmd-analysis.json
+│   ├── flow-analysis.json
 │   ├── framework-analysis.json
-│   └── ...
+│   ├── package-analysis.json
+│   ├── security-summary.json
+│   ├── object-analysis.json
+│   ├── layout-analysis.json
+│   ├── apex-classes-analysis.json
+│   ├── description-analysis.json
+│   └── description-findings.json
+├── dashboard/        # Interactive HTML dashboard
+│   ├── index.html
+│   ├── app.js
+│   └── styles.css
 └── analysis/
     └── executive-summary.md
 
@@ -137,6 +154,10 @@ scripts/
 ├── analyze-frameworks.js
 ├── analyze-packages.js
 ├── analyze-security.js
+├── analyze-objects.js
+├── analyze-layouts.js
+├── analyze-apex-classes.js
+├── analyze-metadata-descriptions.js
 ├── consolidate-findings.js
 └── generate-executive-summary.js
 
@@ -194,3 +215,64 @@ Interpretation:
 | Selector Pattern | Classes named `*Selector` |
 | Service Layer | Classes named `*Service` |
 | Test Factory | `TestDataFactory`, `TestUtil` |
+
+## Quick Reference - Description Analysis
+
+**CRITICAL: AI Readiness**
+Without descriptions, AI tools (Copilot, Claude, Agentforce) cannot understand metadata purposes. This blocks:
+- Automated code analysis and reviews
+- AI-assisted development
+- Intelligent refactoring
+- Impact analysis
+
+| Component | Description Location | Impact if Missing |
+|-----------|---------------------|-------------------|
+| Custom Fields | `<description>` tag | Data model unclear, AI can't analyze |
+| Flows | `<description>` tag | Automation purpose unknown |
+| Apex Classes | ApexDoc `/** */` | Code unmaintainable |
+| LWC | `<description>` in meta | Components hard to find |
+| Permission Sets | `<description>` tag | Security audit issues |
+| Validation Rules | `<description>` tag | Business rules unclear |
+
+## Dashboard
+
+Interactive HTML dashboard to visualize audit results.
+
+### Starting the Dashboard
+```bash
+# From project root - serve from docs/ folder
+cd docs && python3 -m http.server 8080
+
+# Open in browser (note the /dashboard/ path)
+open http://localhost:8080/dashboard/
+```
+
+### Dashboard Sections
+| Section | Description |
+|---------|-------------|
+| Overview | Health score, severity distribution, key metrics |
+| Findings | Searchable/filterable list of all findings |
+| PMD Analysis | Apex code violations by category and rule |
+| Apex Classes | Coverage, API versions, sharing model, test issues |
+| Flow Analysis | Flow types, complexity, issues |
+| Objects & Fields | Custom objects, fields, validation rules |
+| Layouts & Pages | FlexiPages, layouts, component usage |
+| Packages | Installed packages by vendor/category |
+| Security | Profiles, permission sets, named credentials |
+| Architecture | Design patterns, frameworks detected |
+| Documentation | Missing descriptions analysis |
+| Recommendations | Prioritized action plan |
+
+### Data Files Required
+The dashboard reads JSON files from `docs/data/`. Run analysis scripts first:
+```bash
+node scripts/analyze-pmd-results.js
+node scripts/analyze-flows.js
+node scripts/analyze-objects.js
+node scripts/analyze-layouts.js
+node scripts/analyze-apex-classes.js
+node scripts/analyze-frameworks.js
+node scripts/analyze-packages.js
+node scripts/analyze-metadata-descriptions.js
+node scripts/consolidate-findings.js
+```
