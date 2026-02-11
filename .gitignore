@@ -88,12 +88,19 @@ $RECYCLE.BIN/
 # Standard SF project files (not needed for audit)
 # -------------------------------------------
 sfdx-project.json
-package.json
 package-lock.json
 jest.config.js
 eslint.config.js
-README.md
 .forceignore
 .prettierrc
 .prettierignore
 .husky/
+
+# -------------------------------------------
+# IMPORTANT: These files ARE tracked in git:
+# - README.md (project documentation)
+# - package.json (dependencies/scripts)
+# - docs/guides/ (audit guides)
+# - scripts/ (analysis scripts)
+# - config/ (PMD rulesets)
+# -------------------------------------------

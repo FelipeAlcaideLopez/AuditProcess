@@ -16,7 +16,9 @@ const analysis = {
     byRule: {},
     byCategory: {},
     byFile: {},
-    findings: []
+    findings: [],
+    // NEW: Store all individual violations for drill-down
+    allViolations: []
 };
 
 // Map PMD priorities to severity
@@ -66,6 +68,7 @@ let findingId = 1;
 // Process all files and violations
 pmdReport.files.forEach(file => {
     const fileName = file.filename.split('/').pop();
+    const fullPath = file.filename;
 
     file.violations.forEach(violation => {
         analysis.totalViolations++;
@@ -79,18 +82,49 @@ pmdReport.files.forEach(file => {
 
         // Count by rule
         if (!analysis.byRule[rule]) {
-            analysis.byRule[rule] = { count: 0, severity: severity, category: category };
+            analysis.byRule[rule] = { count: 0, severity: severity, category: category, violations: [] };
         }
         analysis.byRule[rule].count++;
+        // Store violation detail in rule
+        analysis.byRule[rule].violations.push({
+            file: fileName,
+            line: violation.beginline,
+            message: violation.description
+        });
 
         // Count by category
         analysis.byCategory[category] = (analysis.byCategory[category] || 0) + 1;
 
-        // Count by file
+        // Count by file with full violation details
         if (!analysis.byFile[fileName]) {
-            analysis.byFile[fileName] = { count: 0, violations: [] };
+            analysis.byFile[fileName] = { count: 0, path: fullPath, violations: [] };
         }
         analysis.byFile[fileName].count++;
+        // Store violation detail in file
+        analysis.byFile[fileName].violations.push({
+            line: violation.beginline,
+            endLine: violation.endline,
+            column: violation.begincolumn,
+            rule: rule,
+            severity: severity,
+            category: category,
+            message: violation.description
+        });
+
+        // NEW: Store in allViolations array for global drill-down
+        analysis.allViolations.push({
+            file: fileName,
+            path: fullPath,
+            line: violation.beginline,
+            endLine: violation.endline,
+            column: violation.begincolumn,
+            rule: rule,
+            ruleset: violation.ruleset,
+            severity: severity,
+            category: category,
+            message: violation.description,
+            priority: violation.priority
+        });
     });
 });
 

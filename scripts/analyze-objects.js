@@ -162,6 +162,76 @@ objectDirs.forEach(objName => {
     });
 });
 
+// Salesforce Limits (Enterprise Edition defaults)
+const LIMITS = {
+    customFieldsPerObject: 500,
+    rollupSummaryPerObject: 25,
+    lookupPerObject: 40,
+    masterDetailPerObject: 2,
+    recordTypesPerObject: 200,
+    validationRulesPerObject: 500,
+    customObjectsOrg: 200,
+    customFieldsOrg: 2000 // Practical limit warning
+};
+
+// Analyze limits per object
+const limitsAnalysis = {
+    objectsNearFieldLimit: [],
+    objectsNearRollupLimit: [],
+    objectsNearLookupLimit: [],
+    orgFieldCount: allFields.length,
+    orgCustomObjects: objects.filter(o => o.isCustom).length
+};
+
+objects.forEach(obj => {
+    const objFields = allFields.filter(f => f.object === obj.name);
+    const rollupCount = objFields.filter(f => f.type === 'Summary').length;
+    const lookupCount = objFields.filter(f => f.type === 'Lookup' || f.type === 'MasterDetail').length;
+    const masterDetailCount = objFields.filter(f => f.type === 'MasterDetail').length;
+
+    // Store counts in object
+    obj.rollupCount = rollupCount;
+    obj.lookupCount = lookupCount;
+    obj.masterDetailCount = masterDetailCount;
+
+    // Check limits
+    const fieldUsage = (obj.fields / LIMITS.customFieldsPerObject) * 100;
+    const rollupUsage = (rollupCount / LIMITS.rollupSummaryPerObject) * 100;
+    const lookupUsage = (lookupCount / LIMITS.lookupPerObject) * 100;
+
+    if (fieldUsage > 50) {
+        limitsAnalysis.objectsNearFieldLimit.push({
+            name: obj.name,
+            fields: obj.fields,
+            limit: LIMITS.customFieldsPerObject,
+            usage: Math.round(fieldUsage)
+        });
+    }
+
+    if (rollupUsage > 50) {
+        limitsAnalysis.objectsNearRollupLimit.push({
+            name: obj.name,
+            rollups: rollupCount,
+            limit: LIMITS.rollupSummaryPerObject,
+            usage: Math.round(rollupUsage)
+        });
+    }
+
+    if (lookupUsage > 50) {
+        limitsAnalysis.objectsNearLookupLimit.push({
+            name: obj.name,
+            lookups: lookupCount,
+            limit: LIMITS.lookupPerObject,
+            usage: Math.round(lookupUsage)
+        });
+    }
+});
+
+// Sort by usage
+limitsAnalysis.objectsNearFieldLimit.sort((a, b) => b.usage - a.usage);
+limitsAnalysis.objectsNearRollupLimit.sort((a, b) => b.usage - a.usage);
+limitsAnalysis.objectsNearLookupLimit.sort((a, b) => b.usage - a.usage);
+
 // Build analysis
 const analysis = {
     summary: {
@@ -172,6 +242,14 @@ const analysis = {
         totalFields: allFields.length,
         totalRecordTypes: allRecordTypes.length,
         totalValidationRules: allValidationRules.length
+    },
+    limits: {
+        config: LIMITS,
+        objectsNearFieldLimit: limitsAnalysis.objectsNearFieldLimit,
+        objectsNearRollupLimit: limitsAnalysis.objectsNearRollupLimit,
+        objectsNearLookupLimit: limitsAnalysis.objectsNearLookupLimit,
+        orgFieldUsage: Math.round((allFields.length / LIMITS.customFieldsOrg) * 100),
+        orgObjectUsage: Math.round((objects.filter(o => o.isCustom).length / LIMITS.customObjectsOrg) * 100)
     },
     objects: objects.sort((a, b) => b.fields - a.fields),
     byNamespace: objects.filter(o => o.namespace).reduce((acc, o) => {
@@ -298,6 +376,88 @@ Object.entries(analysis.recordTypes.byObject).forEach(([obj, count]) => {
             recommendation: 'Review if all record types are necessary',
             effort: 'Medium',
             tool: 'Object Analysis'
+        });
+    }
+});
+
+// LIMITS FINDINGS
+
+// Objects near field limit
+limitsAnalysis.objectsNearFieldLimit.forEach(obj => {
+    if (obj.usage >= 80) {
+        findings.push({
+            id: `LIMIT-FIELD-${obj.name}`,
+            title: `${obj.name}: ${obj.usage}% of field limit used`,
+            severity: obj.usage >= 90 ? 'Critical' : 'High',
+            category: 'Limits',
+            description: `Object has ${obj.fields}/${obj.limit} custom fields`,
+            location: `Object: ${obj.name}`,
+            impact: 'Cannot add new fields, may block future development',
+            recommendation: 'Archive unused fields, consider object decomposition',
+            effort: 'High',
+            tool: 'Limits Analysis'
+        });
+    } else if (obj.usage >= 50) {
+        findings.push({
+            id: `LIMIT-FIELD-${obj.name}`,
+            title: `${obj.name}: ${obj.usage}% of field limit used`,
+            severity: 'Medium',
+            category: 'Limits',
+            description: `Object has ${obj.fields}/${obj.limit} custom fields`,
+            location: `Object: ${obj.name}`,
+            impact: 'Monitor field growth, plan field governance',
+            recommendation: 'Review unused fields, establish field naming standards',
+            effort: 'Medium',
+            tool: 'Limits Analysis'
+        });
+    }
+});
+
+// Objects near rollup summary limit
+limitsAnalysis.objectsNearRollupLimit.forEach(obj => {
+    if (obj.usage >= 80) {
+        findings.push({
+            id: `LIMIT-ROLLUP-${obj.name}`,
+            title: `${obj.name}: ${obj.usage}% of rollup summary limit used`,
+            severity: obj.usage >= 90 ? 'Critical' : 'High',
+            category: 'Limits',
+            description: `Object has ${obj.rollups}/${obj.limit} rollup summary fields`,
+            location: `Object: ${obj.name}`,
+            impact: 'Cannot add new rollups, may block reporting requirements',
+            recommendation: 'Use DLRS or Flow for additional rollups, review necessity of existing',
+            effort: 'Medium',
+            tool: 'Limits Analysis'
+        });
+    } else if (obj.usage >= 50) {
+        findings.push({
+            id: `LIMIT-ROLLUP-${obj.name}`,
+            title: `${obj.name}: ${obj.usage}% of rollup summary limit used`,
+            severity: 'Medium',
+            category: 'Limits',
+            description: `Object has ${obj.rollups}/${obj.limit} rollup summary fields`,
+            location: `Object: ${obj.name}`,
+            impact: 'Limited capacity for future rollups',
+            recommendation: 'Consider Flow or DLRS for new rollup requirements',
+            effort: 'Low',
+            tool: 'Limits Analysis'
+        });
+    }
+});
+
+// Objects near lookup limit
+limitsAnalysis.objectsNearLookupLimit.forEach(obj => {
+    if (obj.usage >= 80) {
+        findings.push({
+            id: `LIMIT-LOOKUP-${obj.name}`,
+            title: `${obj.name}: ${obj.usage}% of relationship limit used`,
+            severity: 'High',
+            category: 'Limits',
+            description: `Object has ${obj.lookups}/${obj.limit} lookup/master-detail relationships`,
+            location: `Object: ${obj.name}`,
+            impact: 'Cannot add new relationships',
+            recommendation: 'Review data model, consider junction objects',
+            effort: 'High',
+            tool: 'Limits Analysis'
         });
     }
 });

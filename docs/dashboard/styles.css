@@ -597,6 +597,25 @@ tr:hover {
     font-size: 0.875rem;
 }
 
+/* Limits Alert */
+.limits-alert {
+    background: linear-gradient(135deg, #c23934 0%, #fe5c4c 100%);
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    color: white;
+}
+
+.limits-alert h3 {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.limits-alert p {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
 /* AI Readiness Alert */
 .ai-readiness-alert {
     background: linear-gradient(135deg, #1A3E5C 0%, #2D5A7B 100%);
@@ -705,6 +724,300 @@ footer a:hover {
 .footer-logo {
     height: 35px;
     width: auto;
+}
+
+/* ============================================
+   MODAL STYLES - Drill-Down Detail View
+   ============================================ */
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(26, 62, 92, 0.7);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    position: relative;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    width: 95%;
+    max-width: 1200px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 100%);
+    color: white;
+}
+
+.modal-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.btn-export {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-export:hover {
+    background: var(--primary-dark);
+}
+
+.modal-close {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.modal-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-light);
+}
+
+.filter-group select,
+.filter-group input {
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    min-width: 120px;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 166, 80, 0.15);
+}
+
+.search-group input {
+    min-width: 200px;
+}
+
+.result-count {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary);
+    background: rgba(0, 166, 80, 0.1);
+    padding: 0.4rem 0.75rem;
+    border-radius: 4px;
+}
+
+.modal-body {
+    flex: 1;
+    overflow: auto;
+    padding: 0;
+}
+
+#modal-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#modal-table th {
+    position: sticky;
+    top: 0;
+    background: var(--secondary);
+    color: white;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+#modal-table td {
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+}
+
+#modal-table tr:hover {
+    background: rgba(0, 166, 80, 0.05);
+}
+
+#modal-table .severity-badge {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+}
+
+#modal-table .severity-badge.Critical { background: var(--critical); }
+#modal-table .severity-badge.High { background: var(--high); }
+#modal-table .severity-badge.Medium { background: var(--medium); }
+#modal-table .severity-badge.Low { background: var(--low); }
+#modal-table .severity-badge.Info { background: var(--info); }
+
+#modal-table .file-name {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 0.8rem;
+    color: var(--secondary);
+}
+
+#modal-table .line-number {
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 0.8rem;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+#modal-table .message-text {
+    color: var(--text);
+    max-width: 400px;
+    word-wrap: break-word;
+}
+
+.modal-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+}
+
+.modal-pagination button {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modal-pagination button:hover:not(:disabled) {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.modal-pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#page-info {
+    font-size: 0.875rem;
+    color: var(--text-light);
+}
+
+/* Clickable elements for drill-down */
+.clickable {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.clickable:hover {
+    color: var(--primary);
+    text-decoration: underline;
+}
+
+.metric-card.clickable:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 166, 80, 0.2);
+    border-top-color: var(--primary);
+}
+
+.metric-card.clickable:hover .metric-value {
+    color: var(--primary);
+}
+
+/* Table row clickable */
+tr.clickable-row {
+    cursor: pointer;
+}
+
+tr.clickable-row:hover {
+    background: rgba(0, 166, 80, 0.1) !important;
+}
+
+/* Chart clickable indicator */
+canvas.clickable-chart {
+    cursor: pointer;
 }
 
 /* Responsive */

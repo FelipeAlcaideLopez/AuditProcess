@@ -10,7 +10,8 @@ const findingFiles = [
     'docs/data/object-findings.json',
     'docs/data/layout-findings.json',
     'docs/data/apex-coverage-findings.json',
-    'docs/data/description-findings.json'
+    'docs/data/description-findings.json',
+    'docs/data/advanced-findings.json'  // Rules from Hubbl, Quality Clouds, etc.
 ];
 
 const allFindings = [];

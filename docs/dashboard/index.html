@@ -31,6 +31,7 @@
         <button class="nav-btn" data-section="security">Security</button>
         <button class="nav-btn" data-section="architecture">Architecture</button>
         <button class="nav-btn" data-section="documentation">Documentation</button>
+        <button class="nav-btn" data-section="advanced">Advanced Rules</button>
         <button class="nav-btn" data-section="recommendations">Recommendations</button>
     </nav>
 
@@ -323,10 +324,45 @@
                     <p id="flows-with-issues" class="metric-value">--</p>
                 </div>
             </div>
-            <div class="chart-container">
-                <h3>Flows by Type</h3>
-                <canvas id="flow-type-chart"></canvas>
+            <div class="charts-row">
+                <div class="chart-container">
+                    <h3>Flows by Type</h3>
+                    <canvas id="flow-type-chart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Flow Issues Distribution</h3>
+                    <canvas id="flow-issues-chart"></canvas>
+                </div>
             </div>
+
+            <!-- Flow Issues Metrics -->
+            <div class="metrics-grid">
+                <div class="metric-card critical">
+                    <h3>DML in Loops</h3>
+                    <p id="flow-dml-loops" class="metric-value">--</p>
+                </div>
+                <div class="metric-card high">
+                    <h3>No Fault Path</h3>
+                    <p id="flow-no-fault" class="metric-value">--</p>
+                </div>
+                <div class="metric-card high">
+                    <h3>Hardcoded IDs</h3>
+                    <p id="flow-hardcoded" class="metric-value">--</p>
+                </div>
+                <div class="metric-card medium">
+                    <h3>No Description</h3>
+                    <p id="flow-no-desc" class="metric-value">--</p>
+                </div>
+                <div class="metric-card medium">
+                    <h3>Unused Variables</h3>
+                    <p id="flow-unused-vars" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Inactive Flows</h3>
+                    <p id="flow-inactive" class="metric-value">--</p>
+                </div>
+            </div>
+
             <div class="table-container">
                 <h3>Complex Flows (>20 elements)</h3>
                 <table id="complex-flows-table">
@@ -521,16 +557,50 @@
                     <p id="total-validation-rules" class="metric-value">--</p>
                 </div>
             </div>
+            <!-- Limits Section -->
+            <div class="limits-alert" id="limits-alert" style="display:none;">
+                <h3>Salesforce Limits Warning</h3>
+                <p id="limits-alert-text">Some objects are approaching Salesforce limits</p>
+            </div>
+
             <div class="charts-row">
                 <div class="chart-container">
                     <h3>Fields by Type</h3>
                     <canvas id="field-type-chart"></canvas>
                 </div>
                 <div class="chart-container">
+                    <h3>Objects Near Field Limit</h3>
+                    <canvas id="field-limit-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <h3>Objects Approaching Limits</h3>
+                <table id="limits-table">
+                    <thead>
+                        <tr>
+                            <th>Object</th>
+                            <th>Fields</th>
+                            <th>Usage</th>
+                            <th>Rollups</th>
+                            <th>Lookups</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-container">
                     <h3>Validation Rules by Object</h3>
                     <canvas id="vr-by-object-chart"></canvas>
                 </div>
+                <div class="chart-container">
+                    <h3>Rollup Summary Usage</h3>
+                    <canvas id="rollup-limit-chart"></canvas>
+                </div>
             </div>
+
             <div class="table-container">
                 <h3>Objects with Most Fields</h3>
                 <table id="objects-table">
@@ -759,6 +829,154 @@
             </div>
         </section>
 
+        <!-- Advanced Rules Section (Hubbl, Quality Clouds, CodeScan patterns) -->
+        <section id="advanced" class="section">
+            <div class="analysis-header">
+                <h2>Advanced Rules Analysis</h2>
+                <p id="advanced-summary">Rules based on industry best practices from Hubbl, Quality Clouds, CodeScan, and PMD</p>
+            </div>
+
+            <!-- Source Tools Info -->
+            <div class="ai-readiness-alert good" style="margin-bottom: 2rem; border-left-color: #1A3E5C;">
+                <div class="ai-alert-icon">🔍</div>
+                <div class="ai-alert-content">
+                    <h3 style="color: #00A650;">Industry Best Practices Analysis</h3>
+                    <p>This section analyzes your org against rules from leading Salesforce audit tools including Hubbl Diagnostics, Quality Clouds, CodeScan, PMD, and Lightning Flow Scanner.</p>
+                    <div class="ai-alert-details">
+                        <span><strong>Apex:</strong> Sharing declarations, legacy patterns, security checks</span>
+                        <span><strong>LWC:</strong> Error handling, accessibility, documentation</span>
+                        <span><strong>Automation:</strong> Deprecated technologies (Workflow Rules, Process Builders)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Apex Advanced Metrics -->
+            <h3 style="margin-bottom: 1rem; color: var(--secondary);">Apex Advanced Checks</h3>
+            <div class="metrics-grid">
+                <div class="metric-card medium">
+                    <h3>Missing Sharing</h3>
+                    <p id="adv-missing-sharing" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Legacy @future</h3>
+                    <p id="adv-legacy-future" class="metric-value">--</p>
+                </div>
+                <div class="metric-card high">
+                    <h3>Hardcoded URLs</h3>
+                    <p id="adv-hardcoded-urls" class="metric-value">--</p>
+                </div>
+                <div class="metric-card critical">
+                    <h3>Dynamic SOQL No CRUD</h3>
+                    <p id="adv-dynamic-soql" class="metric-value">--</p>
+                </div>
+                <div class="metric-card high">
+                    <h3>Triggers with Logic</h3>
+                    <p id="adv-trigger-logic" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>HTTP in Loops</h3>
+                    <p id="adv-http-loops" class="metric-value">--</p>
+                </div>
+            </div>
+
+            <!-- LWC Metrics -->
+            <h3 style="margin: 2rem 0 1rem 0; color: var(--secondary);">Lightning Web Components</h3>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Total LWC</h3>
+                    <p id="adv-lwc-total" class="metric-value">--</p>
+                </div>
+                <div class="metric-card medium">
+                    <h3>With Issues</h3>
+                    <p id="adv-lwc-issues" class="metric-value">--</p>
+                </div>
+                <div class="metric-card">
+                    <h3>Missing Description</h3>
+                    <p id="adv-lwc-no-desc" class="metric-value">--</p>
+                </div>
+            </div>
+
+            <!-- Deprecated Technology -->
+            <h3 style="margin: 2rem 0 1rem 0; color: var(--secondary);">Deprecated Technologies</h3>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Aura Components</h3>
+                    <p id="adv-aura-count" class="metric-value">--</p>
+                </div>
+                <div class="metric-card high">
+                    <h3>Workflow Rules</h3>
+                    <p id="adv-workflow-count" class="metric-value">--</p>
+                </div>
+                <div class="metric-card high">
+                    <h3>Process Builders</h3>
+                    <p id="adv-pb-count" class="metric-value">--</p>
+                </div>
+            </div>
+
+            <!-- Security Advanced -->
+            <h3 style="margin: 2rem 0 1rem 0; color: var(--secondary);">Security Deep Dive</h3>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>API Enabled Profiles</h3>
+                    <p id="adv-api-profiles" class="metric-value">--</p>
+                </div>
+                <div class="metric-card high">
+                    <h3>Critical Perm Sets</h3>
+                    <p id="adv-critical-permsets" class="metric-value">--</p>
+                </div>
+                <div class="metric-card medium">
+                    <h3>Dangerous Methods</h3>
+                    <p id="adv-dangerous-methods" class="metric-value">--</p>
+                </div>
+            </div>
+
+            <!-- Advanced Findings Table -->
+            <div class="table-container" style="margin-top: 2rem;">
+                <h3>Advanced Analysis Findings</h3>
+                <table id="advanced-findings-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Severity</th>
+                            <th>Category</th>
+                            <th>Title</th>
+                            <th>Recommendation</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- LWC Issues Detail -->
+            <div class="table-container">
+                <h3>LWC Components with Issues</h3>
+                <table id="lwc-issues-table">
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Issues Found</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Hardcoded URLs Detail -->
+            <div class="table-container">
+                <h3>Classes with Hardcoded URLs</h3>
+                <table id="hardcoded-urls-table">
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>URL Count</th>
+                            <th>Sample URLs</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
         <!-- Recommendations Section -->
         <section id="recommendations" class="section">
             <div class="analysis-header">
@@ -813,6 +1031,59 @@
             </div>
         </section>
     </main>
+
+    <!-- Detail Modal for Drill-Down -->
+    <div id="detail-modal" class="modal">
+        <div class="modal-overlay" onclick="closeModal()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Details</h2>
+                <div class="modal-actions">
+                    <button id="export-csv-btn" class="btn-export" onclick="exportToCSV()">
+                        <span>Export CSV</span>
+                    </button>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+            </div>
+            <div class="modal-filters">
+                <div class="filter-group">
+                    <label>Severity:</label>
+                    <select id="modal-filter-severity" onchange="applyModalFilters()">
+                        <option value="">All</option>
+                        <option value="Critical">Critical</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                        <option value="Info">Info</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>File:</label>
+                    <select id="modal-filter-file" onchange="applyModalFilters()">
+                        <option value="">All Files</option>
+                    </select>
+                </div>
+                <div class="filter-group search-group">
+                    <label>Search:</label>
+                    <input type="text" id="modal-search" placeholder="Search..." oninput="applyModalFilters()">
+                </div>
+                <div class="filter-group">
+                    <span id="modal-count" class="result-count">0 items</span>
+                </div>
+            </div>
+            <div class="modal-body">
+                <table id="modal-table">
+                    <thead id="modal-thead"></thead>
+                    <tbody id="modal-tbody"></tbody>
+                </table>
+            </div>
+            <div class="modal-pagination">
+                <button id="prev-page" onclick="changePage(-1)" disabled>&lt; Previous</button>
+                <span id="page-info">Page 1 of 1</span>
+                <button id="next-page" onclick="changePage(1)" disabled>Next &gt;</button>
+            </div>
+        </div>
+    </div>
 
     <footer>
         <div class="footer-content">
